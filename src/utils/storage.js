@@ -86,10 +86,10 @@ function createUploadMetaResponseHandler({
 }
 
 function getDownloadURLFromUploadTaskSnapshot(uploadTaskSnapshot) {
-  if (uploadTaskSnapshot.downloadURL === 'string')
-    return uploadTaskSnapshot.downloadURL
-
   // Handle different downloadURL patterns (Firebase JS SDK v5.*.* vs v4.*.*)
+  if (typeof uploadTaskSnapshot.downloadURL === 'string') {
+    return Promise.resolve(uploadTaskSnapshot.downloadURL)
+  }
   if (
     uploadTaskSnapshot.ref &&
     typeof uploadTaskSnapshot.ref.getDownloadURL === 'function'
@@ -153,7 +153,7 @@ export function writeMetadataToDb({
           : firebase // Write metadata to Real Time Database
               .database()
               .ref(dbPath)
-              .push(fileData)
+              .update(fileData) // update instead of push
               .then(() => firebase.database().ref(dbPath))
 
       return metaSetPromise(fileData).then(resultFromSnap)
